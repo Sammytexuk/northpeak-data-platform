@@ -7,12 +7,13 @@
 
 name: NorthPeak Data Platform CI
 
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-
+   on:
+     push:
+       branches: [main, develop]
+     pull_request:
+       branches: [main]
+     workflow_dispatch:
+     
 env:
   PYTHON_VERSION: "3.11"
   DBT_VERSION: "1.8.0"
