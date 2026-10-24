@@ -1,1 +1,32 @@
+## CI/CD for schema deployments
 
+### Principles
+- `create_tables.sql` is the single source of truth for the NP Core schema.
+  Every change goes through a pull request, never directly to a database.
+- CI validates every change against a throwaway PostgreSQL 14 container,
+  matching the production version.
+- No credentials in the repo. Any connection details come from GitHub
+  Actions secrets (enterprise equivalent: Azure Key Vault).
+
+### Pipeline stages
+1. **Lint**: SQL style and syntax check on pull requests (e.g. sqlfluff).
+2. **Build**: start a clean `postgres:14` service container and run
+   `create_tables.sql`. The job fails on any error, which catches problems
+   such as stray characters or a bad foreign key order.
+3. **Verify**: query `information_schema` and `pg_indexes` to assert the
+   expected tables and indexes exist (8 tables, 21 indexes).
+4. **Seed test**: load the sample data and check the known data quality
+   figures: 59 null customer_id rows and 28 duplicate order_ref rows in
+   the orders file.
+5. **Deploy (manual approval)**: on merge to `main`, a GitHub Environment
+   with a required reviewer gates any deployment beyond the test database.
+
+### Idempotency note
+Tables use `CREATE TABLE IF NOT EXISTS`, but the `CREATE INDEX` and
+`ALTER TABLE ... ADD CONSTRAINT` statements are not idempotent. CI therefore
+always builds into a fresh database. For existing environments, changes
+should become versioned migrations (Flyway or Alembic), not re-runs of this file.
+
+### Enterprise mapping
+GitHub Actions maps to Azure DevOps Pipelines or Jenkins. The service
+container maps to a disposable Azure Database for PostgreSQL instance.
