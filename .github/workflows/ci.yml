@@ -113,3 +113,34 @@ jobs:
           path: ./
           base: main
           head: HEAD
+
+  # ── Job 5: SQL schema validation ──────────────────────────────
+  schema-validate:
+    name: schema validate - PostgreSQL DDL builds cleanly
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: ci_only_password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+
+    env:
+      PGPASSWORD: ci_only_password
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build schema from create_tables.sql
+        run: |
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 \
+            -f source_database/create_tables.sql
+
+      - name: Verify expected tables exist
+        run: |
+          psql -h localhost -U postgres -tA -c \
+            "select count(*) from information_schema.tables where table_schema='np_core'" | grep -x 8
