@@ -211,4 +211,3 @@ COMMENT ON COLUMN inventory.quantity_on_hand IS
 
 COMMENT ON COLUMN orders.payment_reference IS
     'May contain card data for pre-2021 records. Silver: SHA-256 mask before writing.';
-×
