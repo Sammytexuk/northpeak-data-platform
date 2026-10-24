@@ -82,3 +82,5 @@ northpeak-data-platform/
 
 *Classification: Internal - Data Engineering Team Only*
 *Document version: 1.0 | Project Lab | July 2026*
+
+“CI enabled”
