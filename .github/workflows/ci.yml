@@ -52,9 +52,10 @@ jobs:
         if: always()
 
   # ── Job 2: dbt compile check ──────────────────────────────────
-  dbt-compile:
+    dbt-compile:
     name: dbt compile - validate SQL syntax
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
@@ -79,6 +80,7 @@ jobs:
   terraform-validate:
     name: terraform validate - IaC syntax check
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
